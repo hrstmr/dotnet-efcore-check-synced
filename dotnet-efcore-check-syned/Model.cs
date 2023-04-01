@@ -39,5 +39,5 @@ public class Post
     public required string Content { get; set; }
 
     public int BlogId { get; set; }
-    public required Blog Blog { get; set; }
+    public Blog? Blog { get; set; }
 }
