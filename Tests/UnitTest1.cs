@@ -277,6 +277,71 @@ namespace dotnet_efcore_check_syned.Migrations
         }
     }
 
+
+
+    [Fact]
+    public async void CheckIfEfMigrationAddIsEmptyWithoutUpdatingOriginalSnapshot()
+    {
+        var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = "dotnet",
+            Arguments = $"ef migrations add {migrationName} --json --no-build -c TestDbContext --project ..\\..\\..\\Tests.csproj -o ..\\Tests\\CheckMigrationIsEmpty -n CustomNS",
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        var proc = Process.Start(startInfo);
+        ArgumentNullException.ThrowIfNull(proc);
+        string output = proc.StandardOutput.ReadToEnd();
+        await proc.WaitForExitAsync();
+        Console.WriteLine(output);
+
+        string directoryPath = "..\\..\\..\\CheckMigrationIsEmpty";
+
+        string[] files = Directory.GetFiles(directoryPath, $"*_{migrationName}.cs");
+        var emptyMigration = @$"using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace dotnet_efcore_check_syned.Migrations
+{{
+    /// <inheritdoc />
+    public partial class {migrationName} : Migration
+    {{
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {{
+
+        }}
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {{
+
+        }}
+    }}
+}}
+";
+        foreach (string file in files)
+        {
+            string content = File.ReadAllText(file);
+            Assert.Equal(emptyMigration, content);
+            Console.WriteLine(content);
+        }
+
+
+        if (Directory.Exists(directoryPath))
+        {
+            Directory.Delete(directoryPath, true);
+            Console.WriteLine("Folder deleted successfully.");
+        }
+        else
+        {
+            Console.WriteLine("Folder does not exist.");
+        }
+    }
+
 }
 
 public class TestDbContext : BloggingContext
