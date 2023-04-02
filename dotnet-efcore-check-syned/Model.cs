@@ -35,6 +35,7 @@ public class Blog
 public class Post
 {
     public int PostId { get; set; }
+    public int NewColumn { get; set; }
     public required string Title { get; set; }
     public required string Content { get; set; }
 
