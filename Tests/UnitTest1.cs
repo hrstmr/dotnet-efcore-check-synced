@@ -1,5 +1,8 @@
 using dotnet_efcore_check_syned;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Tests.Migrations;
 
 namespace Tests;
 
@@ -21,10 +24,12 @@ public class UnitTest1
         //C:\Work\Projects\dotnet-efcore-check-syned\Tests\bin\Debug\this\Tests\Tests.csproj
         //dotnet ef migrations add TEMP --project ..\..\..\Tests.csproj
         //dotnet ef migrations add TEMP --no-build --project ..\..\..\Tests.csproj
+        //dotnet ef dbcontext script
         ProcessStartInfo startInfo = new()
         {
             FileName = "dotnet",
-            Arguments = "ef migrations add TEMP --json --no-build --project ..\\..\\..\\Tests.csproj",
+            Arguments = "ef dbcontext script -c TestDbContext --no-build --project ..\\..\\..\\Tests.csproj -o \"..\\..\\..\\Tests\\DbSnapshot.sql\"",
+            //Arguments = "ef migrations add TEMP --json --no-build --project ..\\..\\..\\Tests.csproj",
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -33,6 +38,14 @@ public class UnitTest1
         ArgumentNullException.ThrowIfNull(proc);
         string output = proc.StandardOutput.ReadToEnd();
         await proc.WaitForExitAsync();
+        var dbModelSnapshot = new TestDbContextModelSnapshot();
+        
+        string jsonString = JsonSerializer.Serialize(dbModelSnapshot, new JsonSerializerOptions()
+        {
+            ReferenceHandler = ReferenceHandler.Preserve
+        });
+        string jsonString2 = JsonSerializer.Serialize(dbModelSnapshot);
+        //Snapshot.Match(dbModelSnapshot);
         Assert.NotNull(output);
         //TestDbContextModelSnapshot.
 
