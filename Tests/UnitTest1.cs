@@ -1,4 +1,5 @@
 using dotnet_efcore_check_syned;
+using Snapshooter.Xunit;
 using System.Diagnostics;
 
 namespace Tests;
@@ -24,20 +25,20 @@ public class UnitTest1
         //dotnet ef dbcontext script
 
 
-        ProcessStartInfo generateMigrationSnapshot = new()
-        {
-            FileName = "dotnet",
-            Arguments = "ef migrations add TEMP --json --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        var generateMigrationSnapshotProcess = Process.Start(generateMigrationSnapshot);
-        ArgumentNullException.ThrowIfNull(generateMigrationSnapshotProcess);
-        string generateMigrationSnapshotProcessOutput = generateMigrationSnapshotProcess.StandardOutput.ReadToEnd();
-        await generateMigrationSnapshotProcess.WaitForExitAsync();
+        //ProcessStartInfo generateMigrationSnapshot = new()
+        //{
+        //    FileName = "dotnet",
+        //    Arguments = "ef migrations add TEMP --json --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+        //    CreateNoWindow = true,
+        //    RedirectStandardOutput = true,
+        //    RedirectStandardError = true,
+        //};
+        //var generateMigrationSnapshotProcess = Process.Start(generateMigrationSnapshot);
+        //ArgumentNullException.ThrowIfNull(generateMigrationSnapshotProcess);
+        //string generateMigrationSnapshotProcessOutput = generateMigrationSnapshotProcess.StandardOutput.ReadToEnd();
+        //await generateMigrationSnapshotProcess.WaitForExitAsync();
 
-        Console.WriteLine(generateMigrationSnapshotProcessOutput);
+        //Console.WriteLine(generateMigrationSnapshotProcessOutput);
 
         ProcessStartInfo startInfo = new()
         {
@@ -55,24 +56,28 @@ public class UnitTest1
 
         Console.WriteLine(output);
 
-        ProcessStartInfo removeMigrationSnapshot = new()
-        {
-            FileName = "dotnet",
-            Arguments = "ef migrations remove  --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        var removeMigrationSnapshotProcess = Process.Start(removeMigrationSnapshot);
-        ArgumentNullException.ThrowIfNull(removeMigrationSnapshotProcess);
-        string removeMigrationSnapshotProcessOutput = removeMigrationSnapshotProcess.StandardOutput.ReadToEnd();
-        await removeMigrationSnapshotProcess.WaitForExitAsync();
 
 
-        Console.WriteLine(removeMigrationSnapshotProcessOutput);
+        //ProcessStartInfo removeMigrationSnapshot = new()
+        //{
+        //    FileName = "dotnet",
+        //    Arguments = "ef migrations remove  --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+        //    CreateNoWindow = true,
+        //    RedirectStandardOutput = true,
+        //    RedirectStandardError = true,
+        //};
+        //var removeMigrationSnapshotProcess = Process.Start(removeMigrationSnapshot);
+        //ArgumentNullException.ThrowIfNull(removeMigrationSnapshotProcess);
+        //string removeMigrationSnapshotProcessOutput = removeMigrationSnapshotProcess.StandardOutput.ReadToEnd();
+        //await removeMigrationSnapshotProcess.WaitForExitAsync();
 
-        //Snapshot.Match(dbModelSnapshot);
-        Assert.NotNull(output);
+        //Console.WriteLine(removeMigrationSnapshotProcessOutput);
+
+        string path = "..\\..\\..\\Tests\\DbSnapshot.sql";
+        string content = File.ReadAllText(path);
+
+        Snapshot.Match(content);
+        Assert.NotNull(content);
         //TestDbContextModelSnapshot.
 
         //var builder = new DbContextOptionsBuilder<BloggingContext>();
