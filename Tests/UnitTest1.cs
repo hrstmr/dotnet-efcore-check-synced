@@ -1,8 +1,5 @@
 using dotnet_efcore_check_syned;
 using System.Diagnostics;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Tests.Migrations;
 
 namespace Tests;
 
@@ -25,11 +22,28 @@ public class UnitTest1
         //dotnet ef migrations add TEMP --project ..\..\..\Tests.csproj
         //dotnet ef migrations add TEMP --no-build --project ..\..\..\Tests.csproj
         //dotnet ef dbcontext script
+
+
+        ProcessStartInfo generateMigrationSnapshot = new()
+        {
+            FileName = "dotnet",
+            Arguments = "ef migrations add TEMP --json --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        var generateMigrationSnapshotProcess = Process.Start(generateMigrationSnapshot);
+        ArgumentNullException.ThrowIfNull(generateMigrationSnapshotProcess);
+        string generateMigrationSnapshotProcessOutput = generateMigrationSnapshotProcess.StandardOutput.ReadToEnd();
+        await generateMigrationSnapshotProcess.WaitForExitAsync();
+
+        Console.WriteLine(generateMigrationSnapshotProcessOutput);
+
         ProcessStartInfo startInfo = new()
         {
             FileName = "dotnet",
             Arguments = "ef dbcontext script -c TestDbContext --no-build --project ..\\..\\..\\Tests.csproj -o \"..\\..\\..\\Tests\\DbSnapshot.sql\"",
-            //Arguments = "ef migrations add TEMP --json --no-build --project ..\\..\\..\\Tests.csproj",
+            //Arguments = "ef migrations add TEMP --json --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -38,13 +52,25 @@ public class UnitTest1
         ArgumentNullException.ThrowIfNull(proc);
         string output = proc.StandardOutput.ReadToEnd();
         await proc.WaitForExitAsync();
-        var dbModelSnapshot = new TestDbContextModelSnapshot();
-        
-        string jsonString = JsonSerializer.Serialize(dbModelSnapshot, new JsonSerializerOptions()
+
+        Console.WriteLine(output);
+
+        ProcessStartInfo removeMigrationSnapshot = new()
         {
-            ReferenceHandler = ReferenceHandler.Preserve
-        });
-        string jsonString2 = JsonSerializer.Serialize(dbModelSnapshot);
+            FileName = "dotnet",
+            Arguments = "ef migrations remove  --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        var removeMigrationSnapshotProcess = Process.Start(removeMigrationSnapshot);
+        ArgumentNullException.ThrowIfNull(removeMigrationSnapshotProcess);
+        string removeMigrationSnapshotProcessOutput = removeMigrationSnapshotProcess.StandardOutput.ReadToEnd();
+        await removeMigrationSnapshotProcess.WaitForExitAsync();
+
+
+        Console.WriteLine(removeMigrationSnapshotProcessOutput);
+
         //Snapshot.Match(dbModelSnapshot);
         Assert.NotNull(output);
         //TestDbContextModelSnapshot.
