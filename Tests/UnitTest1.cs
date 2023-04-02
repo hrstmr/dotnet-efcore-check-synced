@@ -1,11 +1,7 @@
 using dotnet_efcore_check_syned;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Migrations.Design;
-using Microsoft.EntityFrameworkCore.Scaffolding;
-using Microsoft.Extensions.DependencyInjection;
+using Snapshooter.Xunit;
 //using Snapshooter.Xunit;
 using System.Diagnostics;
-using Tests.MigrationsToDelete;
 
 namespace Tests;
 
@@ -18,23 +14,24 @@ public class UnitTest1
         //var db = new TestDbContext();
 
         // Create design-time services
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddEntityFrameworkDesignTimeServices();
-        //serviceCollection.AddDbContextDesignTimeServices(db);
-        var serviceProvider = serviceCollection.BuildServiceProvider();
+        //var serviceCollection = new ServiceCollection();
+        //serviceCollection.AddEntityFrameworkDesignTimeServices();
+        ////serviceCollection.AddDbContextDesignTimeServices(db);
+        //var serviceProvider = serviceCollection.BuildServiceProvider();
 
-        var dbContextModelSnapshot = new TestDbContextModelSnapshot();
-        var model = dbContextModelSnapshot.Model;
+        //var dbContextModelSnapshot = new TestDbContextModelSnapshot();
+        //var blogginModelSnapshot = new BloggingContextModelSnapshot();
+        //var model = dbContextModelSnapshot.Model;
         
-        var migrationsCodeGenerator = serviceProvider.GetService<IMigrationsCodeGenerator>();
+        //var migrationsCodeGenerator = serviceProvider.GetService<IMigrationsCodeGenerator>();
 
-        var snapshot = migrationsCodeGenerator?.GenerateSnapshot(
-            "dbContextSnapshot",
-            typeof(TestDbContext),
-            "dbContextSnapshot",
-            model);
+        //var snapshot = migrationsCodeGenerator?.GenerateSnapshot(
+        //    "dbContextSnapshot",
+        //    typeof(TestDbContext),
+        //    "dbContextSnapshot",
+        //    model);
 
-        Console.WriteLine(snapshot);
+        //Console.WriteLine(snapshot);
     }
 
     [Fact]
@@ -52,7 +49,7 @@ public class UnitTest1
         ProcessStartInfo generateMigrationSnapshot = new()
         {
             FileName = "dotnet",
-            Arguments = "ef migrations add TEMP --json --no-build  -c TestDbContext --project \"..\\..\\..\\Tests.csproj\" -o \"MigrationsToDelete\"",
+            Arguments = "ef migrations add TEMP --json --no-build  -c TestDbContext --project \"..\\..\\..\\Tests.csproj\" -o \"MigrationsToDelete\" ",
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -82,25 +79,25 @@ public class UnitTest1
 
 
 
-        ProcessStartInfo removeMigrationSnapshot = new()
-        {
-            FileName = "dotnet",
-            Arguments = "ef migrations remove  --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        var removeMigrationSnapshotProcess = Process.Start(removeMigrationSnapshot);
-        ArgumentNullException.ThrowIfNull(removeMigrationSnapshotProcess);
-        string removeMigrationSnapshotProcessOutput = removeMigrationSnapshotProcess.StandardOutput.ReadToEnd();
-        await removeMigrationSnapshotProcess.WaitForExitAsync();
+        //ProcessStartInfo removeMigrationSnapshot = new()
+        //{
+        //    FileName = "dotnet",
+        //    Arguments = "ef migrations remove  --no-build  -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+        //    CreateNoWindow = true,
+        //    RedirectStandardOutput = true,
+        //    RedirectStandardError = true,
+        //};
+        //var removeMigrationSnapshotProcess = Process.Start(removeMigrationSnapshot);
+        //ArgumentNullException.ThrowIfNull(removeMigrationSnapshotProcess);
+        //string removeMigrationSnapshotProcessOutput = removeMigrationSnapshotProcess.StandardOutput.ReadToEnd();
+        //await removeMigrationSnapshotProcess.WaitForExitAsync();
 
-        Console.WriteLine(removeMigrationSnapshotProcessOutput);
+        //Console.WriteLine(removeMigrationSnapshotProcessOutput);
 
         string path = "..\\..\\..\\Tests\\DbSnapshot.sql";
         string content = File.ReadAllText(path);
 
-        //Snapshot.Match(content);
+        Snapshot.Match(content);
         Assert.NotNull(content);
         //TestDbContextModelSnapshot.
 
@@ -126,30 +123,30 @@ public class UnitTest1
     public static bool CompareDbContextModelSnapshots(string snapshotFile1, string snapshotFile2)
     {
         return false;
-        var db = new TestDbContext();
+        //var db = new TestDbContext();
 
         // Create design-time services
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddEntityFrameworkDesignTimeServices();
-        serviceCollection.AddDbContextDesignTimeServices(db);
-        var serviceProvider = serviceCollection.BuildServiceProvider();
+        //var serviceCollection = new ServiceCollection();
+        //serviceCollection.AddEntityFrameworkDesignTimeServices();
+        //serviceCollection.AddDbContextDesignTimeServices(db);
+        //var serviceProvider = serviceCollection.BuildServiceProvider();
 
-        var dbContextModelSnapshot = new TestDbContextModelSnapshot();
-        var model = dbContextModelSnapshot.Model;
+        ////var dbContextModelSnapshot = new TestDbContextModelSnapshot();
+        //var model = dbContextModelSnapshot.Model;
 
-        // Add a migration
-        var modelCodeGenerator = serviceProvider.GetService<IModelCodeGenerator>();
+        //// Add a migration
+        //var modelCodeGenerator = serviceProvider.GetService<IModelCodeGenerator>();
 
 
-        var migrationsCodeGenerator = serviceProvider.GetService<IMigrationsCodeGenerator>();
+        //var migrationsCodeGenerator = serviceProvider.GetService<IMigrationsCodeGenerator>();
 
-        var snapshot = migrationsCodeGenerator?.GenerateSnapshot(
-            "dbContextSnapshot",
-            typeof(TestDbContext),
-            "dbContextSnapshot",
-            model);
+        //var snapshot = migrationsCodeGenerator?.GenerateSnapshot(
+        //    "dbContextSnapshot",
+        //    typeof(TestDbContext),
+        //    "dbContextSnapshot",
+        //    model);
 
-        Console.WriteLine(snapshot);
+        //Console.WriteLine(snapshot);
 
 
 
@@ -191,6 +188,94 @@ public class UnitTest1
     //    return modelSnapshot.Load(snapshotId);
     //}
 
+    [Fact]
+    public async void CheckIfEfMigrationAddIsRequired()
+    {
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = "dotnet",
+            Arguments = "ef dbcontext script -c TestDbContext --no-build --project ..\\..\\..\\Tests.csproj -o \"..\\..\\..\\Tests\\DbSnapshot.sql\"",
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        var proc = Process.Start(startInfo);
+        ArgumentNullException.ThrowIfNull(proc);
+        string output = proc.StandardOutput.ReadToEnd();
+        await proc.WaitForExitAsync();
+
+        string path = "..\\..\\..\\Tests\\DbSnapshot.sql";
+        string content = File.ReadAllText(path);
+
+        Snapshot.Match(content);
+        Assert.NotNull(content);
+
+        Console.WriteLine(output);
+    }
+
+
+    [Fact]
+    public async void CheckIfEfMigrationAddIsEmpty()
+    {
+        var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = "dotnet",
+            Arguments = $"ef migrations add {migrationName} --json --no-build  -c BloggingContext --project ..\\..\\..\\..\\dotnet-efcore-check-syned\\dotnet-efcore-check-syned.csproj -o ..\\Tests\\CheckMigrationIsEmpty ",
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        var proc = Process.Start(startInfo);
+        ArgumentNullException.ThrowIfNull(proc);
+        string output = proc.StandardOutput.ReadToEnd();
+        await proc.WaitForExitAsync();
+        Console.WriteLine(output);
+
+        string directoryPath = "..\\..\\..\\CheckMigrationIsEmpty";
+
+        string[] files = Directory.GetFiles(directoryPath, $"*_{migrationName}.cs");
+        var emptyMigration = @$"using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace dotnet_efcore_check_syned.Migrations
+{{
+    /// <inheritdoc />
+    public partial class {migrationName} : Migration
+    {{
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {{
+
+        }}
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {{
+
+        }}
+    }}
+}}
+";
+        foreach (string file in files)
+        {
+            string content = File.ReadAllText(file);
+            Assert.Equal(emptyMigration, content);
+            Console.WriteLine(content);
+        }
+
+
+        if (Directory.Exists(directoryPath))
+        {
+            Directory.Delete(directoryPath, true);
+            Console.WriteLine("Folder deleted successfully.");
+        }
+        else
+        {
+            Console.WriteLine("Folder does not exist.");
+        }
+    }
 
 }
 
