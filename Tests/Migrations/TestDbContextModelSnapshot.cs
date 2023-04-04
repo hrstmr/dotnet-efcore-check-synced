@@ -44,9 +44,6 @@ namespace CustomNS
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("NewColumn2")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
