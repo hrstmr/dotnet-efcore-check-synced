@@ -349,29 +349,29 @@ namespace dotnet_efcore_check_syned.Migrations
     [Fact]
     public async void CheckSnapshot()
     {
-        //var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
-        //ProcessStartInfo startInfo = new()
-        //{
-        //    FileName = "dotnet",
-        //    Arguments = $"ef migrations add {migrationName} --json --no-build -c TestDbContext --project ..\\..\\..\\Tests.csproj",
-        //    CreateNoWindow = true,
-        //    RedirectStandardOutput = true,
-        //    RedirectStandardError = true,
-        //};
-        //var proc = Process.Start(startInfo);
-        //ArgumentNullException.ThrowIfNull(proc);
-        //string output = proc.StandardOutput.ReadToEnd();
-        //await proc.WaitForExitAsync();
-        //Console.WriteLine(output);
+        var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = "dotnet",
+            Arguments = $"ef migrations add {migrationName} --json --no-build -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        var proc = Process.Start(startInfo);
+        ArgumentNullException.ThrowIfNull(proc);
+        string output = proc.StandardOutput.ReadToEnd();
+        await proc.WaitForExitAsync();
+        Console.WriteLine(output);
 
-        //string directoryPath = "..\\..\\..\\Migrations";
+        string directoryPath = "..\\..\\..\\Migrations";
 
-        //var files = Directory.GetFiles(directoryPath, $"*_{migrationName}.cs");
+        var files = Directory.GetFiles(directoryPath, $"*_{migrationName}*.cs");
 
-        //foreach (string file in files)
-        //{
-        //    File.Delete(file);
-        //}
+        foreach (string file in files)
+        {
+            File.Delete(file);
+        }
 
 
 
