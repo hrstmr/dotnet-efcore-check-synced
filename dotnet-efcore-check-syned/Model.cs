@@ -20,8 +20,8 @@ public class BloggingContext : DbContext
 
     // The following configures EF to create a Sqlite database file in the
     // special "local" folder for your platform.
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite($"Data Source={DbPath}");
+    protected override void OnConfiguring(DbContextOptionsBuilder options) =>
+        options.UseSqlite($"Data Source={DbPath}");
 }
 
 public class Blog
@@ -34,7 +34,8 @@ public class Blog
 
 public class Post
 {
-    public int PostId { get; set; }
+    public int? PostId { get; set; }
+
     //public int NewColumn2 { get; set; }
     public required string Title { get; set; }
     public required string Content { get; set; }

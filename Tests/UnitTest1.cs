@@ -378,11 +378,13 @@ namespace dotnet_efcore_check_syned.Migrations
         var linesToIgnore = new List<string>
         {
             //// Lines from Main db snapshot
+            "using System;",
             "using dotnet_efcore_check_syned;",
             "namespace dotnet_efcore_check_syned.Migrations",
             "[DbContext(typeof(BloggingContext))]",
             "partial class BloggingContextModelSnapshot : ModelSnapshot",
             //// Lines from Test db snapshot
+            "using System;",
             "using Tests;",
             "namespace CustomNS",
             "[DbContext(typeof(TestDbContext))]",
