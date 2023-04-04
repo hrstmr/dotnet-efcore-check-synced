@@ -350,14 +350,16 @@ namespace dotnet_efcore_check_syned.Migrations
     public async void CheckSnapshot()
     {
         var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
-        ProcessStartInfo startInfo = new()
-        {
-            FileName = "dotnet",
-            Arguments = $"ef migrations add {migrationName} --json --no-build -c TestDbContext --project ..\\..\\..\\Tests.csproj",
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
+        ProcessStartInfo startInfo =
+            new()
+            {
+                FileName = "dotnet",
+                Arguments =
+                    $"ef migrations add {migrationName} --json --no-build -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
         var proc = Process.Start(startInfo);
         ArgumentNullException.ThrowIfNull(proc);
         string output = proc.StandardOutput.ReadToEnd();
@@ -372,8 +374,6 @@ namespace dotnet_efcore_check_syned.Migrations
         {
             File.Delete(file);
         }
-
-
 
         var linesToIgnore = new List<string>
         {
@@ -397,7 +397,8 @@ namespace dotnet_efcore_check_syned.Migrations
             File.ReadAllText(testDbSnapshotPath)
                 .Split("\r\n")
                 .Where(
-                    line => !(linesToIgnore.Contains(line.Trim()) || line.Contains(productVersionLine))
+                    line =>
+                        !(linesToIgnore.Contains(line.Trim()) || line.Contains(productVersionLine))
                 )
         );
 
@@ -410,7 +411,8 @@ namespace dotnet_efcore_check_syned.Migrations
             File.ReadAllText(mainDbSnapshotPath)
                 .Split("\r\n")
                 .Where(
-                    line => !(linesToIgnore.Contains(line.Trim()) || line.Contains(productVersionLine))
+                    line =>
+                        !(linesToIgnore.Contains(line.Trim()) || line.Contains(productVersionLine))
                 )
         );
 
