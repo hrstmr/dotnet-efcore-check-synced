@@ -192,12 +192,15 @@ public class UnitTest1
     [Fact]
     public async void CheckIfEfMigrationAddIsRequired()
     {
+        var projLoction = @"..\..\..\..\dotnet-efcore-check-syned\dotnet-efcore-check-syned.csproj";
+        var outputLoction = @"..\..\..\Tests\DbSnapshot.sql";
+
         ProcessStartInfo startInfo =
             new()
             {
                 FileName = "dotnet",
                 Arguments =
-                    "ef dbcontext script -c TestDbContext --no-build --project ..\\..\\..\\Tests.csproj -o \"..\\..\\..\\Tests\\DbSnapshot.sql\"",
+                    $"ef dbcontext script -c BloggingContext --no-build -p {projLoction} -o {outputLoction}",
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -207,13 +210,10 @@ public class UnitTest1
         string output = proc.StandardOutput.ReadToEnd();
         await proc.WaitForExitAsync();
 
-        string path = "..\\..\\..\\Tests\\DbSnapshot.sql";
-        string content = File.ReadAllText(path);
+        string content = File.ReadAllText(outputLoction);
 
         Snapshot.Match(content);
         Assert.NotNull(content);
-
-        Console.WriteLine(output);
     }
 
     [Fact]
