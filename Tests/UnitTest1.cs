@@ -457,13 +457,12 @@ namespace CustomNS
         var productVersionLine = """modelBuilder.HasAnnotation("ProductVersion",""";
 
         var testDbSnapshotPath = @"..\..\..\Migrations\TestDbContextModelSnapshot.cs";
-        string testDbSnapshot = GetSnapshotContent(testDbSnapshotPath);
 
         var mainDbSnapshotPath =
             @"..\..\..\..\dotnet-efcore-check-syned\Migrations\BloggingContextModelSnapshot.cs";
 
-        //string mainDbSnapshot = File.ReadAllText(mainDbSnapshotPath);
-        string mainDbSnapshot = GetSnapshotContent(mainDbSnapshotPath);
+        var testDbSnapshot = GetSnapshotContent(testDbSnapshotPath);
+        var mainDbSnapshot = GetSnapshotContent(mainDbSnapshotPath);
 
         Assert.Equal(mainDbSnapshot, testDbSnapshot);
 
