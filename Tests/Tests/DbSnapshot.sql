@@ -6,7 +6,7 @@
 
 CREATE TABLE "Posts" (
     "PostId" INTEGER NOT NULL CONSTRAINT "PK_Posts" PRIMARY KEY AUTOINCREMENT,
-    "NewColumn2" INTEGER NOT NULL,
+    "NewColumn" INTEGER NOT NULL,
     "Title" TEXT NOT NULL,
     "Content" TEXT NOT NULL,
     "BlogId" INTEGER NOT NULL,
