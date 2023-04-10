@@ -192,15 +192,16 @@ public class UnitTest1
     [Fact]
     public async void CheckIfEfMigrationAddIsRequired()
     {
-        var projLoction = @"..\..\..\..\dotnet-efcore-check-syned\dotnet-efcore-check-syned.csproj";
-        var outputLoction = @"..\..\..\Tests\DbSnapshot.sql";
+        var projLocation =
+            @"..\..\..\..\dotnet-efcore-check-syned\dotnet-efcore-check-syned.csproj";
+        var outputLocation = @"..\..\..\Tests\DbSnapshot.sql";
 
         ProcessStartInfo startInfo =
             new()
             {
                 FileName = "dotnet",
                 Arguments =
-                    $"ef dbcontext script -c BloggingContext --no-build -p {projLoction} -o {outputLoction}",
+                    $"ef dbcontext script -c BloggingContext --no-build -p {projLocation} -o {outputLocation}",
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -210,35 +211,49 @@ public class UnitTest1
         string output = proc.StandardOutput.ReadToEnd();
         await proc.WaitForExitAsync();
 
-        string content = File.ReadAllText(outputLoction);
+        string content = File.ReadAllText(outputLocation);
 
         Snapshot.Match(content);
         Assert.NotNull(content);
     }
 
     [Fact]
-    public async void CheckIfEfMigrationAddIsEmpty()
+    public async void CheckIfEfMigrationAddIsEmpty1()
     {
+        // Specifies the location of the .csproj file that contains the DbContext
+        // for which the migration is being added.
+        var projLocation =
+            @"..\..\..\..\dotnet-efcore-check-syned\dotnet-efcore-check-syned.csproj";
+
+        // Output location for the generated migration files.
+        var outputLocation = @"..\Tests\CheckMigrationIsEmpty";
+
+        // Name of the migration to be added.
         var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
+
+        // Configures the dotnet command to add a new migration for the specified DbContext.
         ProcessStartInfo startInfo =
             new()
             {
                 FileName = "dotnet",
                 Arguments =
-                    $"ef migrations add {migrationName} --json --no-build  -c BloggingContext --project ..\\..\\..\\..\\dotnet-efcore-check-syned\\dotnet-efcore-check-syned.csproj -o ..\\Tests\\CheckMigrationIsEmpty ",
+                    $"ef migrations add {migrationName} --json --no-build  -c BloggingContext -p {projLocation} -o {outputLocation}",
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
             };
+
+        // Starts the process to add the new migration.
         var proc = Process.Start(startInfo);
         ArgumentNullException.ThrowIfNull(proc);
         string output = proc.StandardOutput.ReadToEnd();
         await proc.WaitForExitAsync();
         Console.WriteLine(output);
 
-        string directoryPath = "..\\..\\..\\CheckMigrationIsEmpty";
+        // Specifies the relative location of the output directory.
+        string relativeOutputLocation = @"..\..\..\CheckMigrationIsEmpty";
 
-        string[] files = Directory.GetFiles(directoryPath, $"*_{migrationName}.cs");
+        // Defines the contents of an empty migration.
         var emptyMigration =
             @$"using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -247,7 +262,7 @@ public class UnitTest1
 namespace dotnet_efcore_check_syned.Migrations
 {{
     /// <inheritdoc />
-    public partial class {migrationName} : Migration
+    public partial class SHOULD_BE_REMOVED_BEFORE_PR : Migration
     {{
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -263,22 +278,72 @@ namespace dotnet_efcore_check_syned.Migrations
     }}
 }}
 ";
-        foreach (string file in files)
-        {
-            string content = File.ReadAllText(file);
-            Assert.Equal(emptyMigration, content);
-            Console.WriteLine(content);
-        }
 
-        if (Directory.Exists(directoryPath))
-        {
-            Directory.Delete(directoryPath, true);
-            Console.WriteLine("Folder deleted successfully.");
-        }
-        else
-        {
-            Console.WriteLine("Folder does not exist.");
-        }
+        // Retrieves the contents of the newly added migration file and compares
+        // it to the expected contents of an empty migration.
+        var file = Directory.GetFiles(relativeOutputLocation, $"*_{migrationName}.cs").First();
+        var migration = File.ReadAllText(file);
+        Assert.Equal(emptyMigration, migration);
+
+        // Deletes the output directory and its contents.
+        Directory.Delete(relativeOutputLocation, true);
+    }
+
+    [Fact]
+    public async void CheckIfEfMigrationAddIsEmpty()
+    {
+        var projLocation =
+            @"..\..\..\..\dotnet-efcore-check-syned\dotnet-efcore-check-syned.csproj";
+        var outputLocation = @"..\Tests\CheckMigrationIsEmpty";
+        var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
+        ProcessStartInfo startInfo =
+            new()
+            {
+                FileName = "dotnet",
+                Arguments =
+                    $"ef migrations add {migrationName} --json --no-build  -c BloggingContext -p {projLocation} -o {outputLocation}",
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+        var proc = Process.Start(startInfo);
+        ArgumentNullException.ThrowIfNull(proc);
+        string output = proc.StandardOutput.ReadToEnd();
+        await proc.WaitForExitAsync();
+        Console.WriteLine(output);
+
+        string relativeOutputLocation = @"..\..\..\CheckMigrationIsEmpty";
+
+        var emptyMigration =
+            @$"using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace dotnet_efcore_check_syned.Migrations
+{{
+    /// <inheritdoc />
+    public partial class SHOULD_BE_REMOVED_BEFORE_PR : Migration
+    {{
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {{
+
+        }}
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {{
+
+        }}
+    }}
+}}
+";
+
+        var file = Directory.GetFiles(relativeOutputLocation, $"*_{migrationName}.cs").First();
+        var migration = File.ReadAllText(file);
+        Assert.Equal(emptyMigration, migration);
+
+        Directory.Delete(relativeOutputLocation, true);
     }
 
     [Fact]
