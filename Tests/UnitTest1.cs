@@ -374,7 +374,7 @@ namespace dotnet_efcore_check_syned.Migrations
 
 #nullable disable
 
-namespace dotnet_efcore_check_syned.Migrations
+namespace CustomNS
 {{
     /// <inheritdoc />
     public partial class {migrationName} : Migration
@@ -412,7 +412,7 @@ namespace dotnet_efcore_check_syned.Migrations
     }
 
     [Fact]
-    public async void CheckSnapshot()
+    public async void CompareSnapshotsOfBloggingAndTest()
     {
         var migrationName = "SHOULD_BE_REMOVED_BEFORE_PR";
         ProcessStartInfo startInfo =
@@ -420,7 +420,7 @@ namespace dotnet_efcore_check_syned.Migrations
             {
                 FileName = "dotnet",
                 Arguments =
-                    $"ef migrations add {migrationName} --json --no-build -c TestDbContext --project ..\\..\\..\\Tests.csproj",
+                    $"ef migrations add {migrationName} --json --no-build -c TestDbContext -p ..\\..\\..\\Tests.csproj",
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -431,24 +431,22 @@ namespace dotnet_efcore_check_syned.Migrations
         await proc.WaitForExitAsync();
         Console.WriteLine(output);
 
-        string directoryPath = "..\\..\\..\\Migrations";
+        string migrationDir = @"..\..\..\Migrations";
 
-        var files = Directory.GetFiles(directoryPath, $"*_{migrationName}*.cs");
-
-        foreach (string file in files)
-        {
-            File.Delete(file);
-        }
+        Directory
+            .GetFiles(migrationDir, $"*_{migrationName}*.cs")
+            .ToList()
+            .ForEach(f => File.Delete(f));
 
         var linesToIgnore = new List<string>
         {
-            //// Lines from Main db snapshot
+            // Lines from Main db snapshot
             "using System;",
             "using dotnet_efcore_check_syned;",
             "namespace dotnet_efcore_check_syned.Migrations",
             "[DbContext(typeof(BloggingContext))]",
             "partial class BloggingContextModelSnapshot : ModelSnapshot",
-            //// Lines from Test db snapshot
+            // Lines from Test db snapshot
             "using System;",
             "using Tests;",
             "namespace CustomNS",
@@ -456,34 +454,32 @@ namespace dotnet_efcore_check_syned.Migrations
             "partial class TestDbContextModelSnapshot : ModelSnapshot",
         };
 
-        var productVersionLine = "modelBuilder.HasAnnotation(\"ProductVersion\",";
+        var productVersionLine = """modelBuilder.HasAnnotation("ProductVersion",""";
 
-        var testDbSnapshotPath = "..\\..\\..\\Migrations\\TestDbContextModelSnapshot.cs";
-        string testDbSnapshot = string.Join(
-            "\r\n",
-            File.ReadAllText(testDbSnapshotPath)
-                .Split("\r\n")
-                .Where(
-                    line =>
-                        !(linesToIgnore.Contains(line.Trim()) || line.Contains(productVersionLine))
-                )
-        );
+        var testDbSnapshotPath = @"..\..\..\Migrations\TestDbContextModelSnapshot.cs";
+        string testDbSnapshot = GetSnapshotContent(testDbSnapshotPath);
 
         var mainDbSnapshotPath =
-            "..\\..\\..\\..\\dotnet-efcore-check-syned\\Migrations\\BloggingContextModelSnapshot.cs";
+            @"..\..\..\..\dotnet-efcore-check-syned\Migrations\BloggingContextModelSnapshot.cs";
 
         //string mainDbSnapshot = File.ReadAllText(mainDbSnapshotPath);
-        string mainDbSnapshot = string.Join(
-            "\r\n",
-            File.ReadAllText(mainDbSnapshotPath)
-                .Split("\r\n")
-                .Where(
-                    line =>
-                        !(linesToIgnore.Contains(line.Trim()) || line.Contains(productVersionLine))
-                )
-        );
+        string mainDbSnapshot = GetSnapshotContent(mainDbSnapshotPath);
 
         Assert.Equal(mainDbSnapshot, testDbSnapshot);
+
+        string GetSnapshotContent(string mainDbSnapshotPath) =>
+            string.Join(
+                "\r\n",
+                File.ReadAllText(mainDbSnapshotPath)
+                    .Split("\r\n")
+                    .Where(
+                        line =>
+                            !(
+                                linesToIgnore.Contains(line.Trim())
+                                || line.Contains(productVersionLine)
+                            )
+                    )
+            );
     }
 }
 
