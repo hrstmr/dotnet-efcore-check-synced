@@ -1,0 +1,42 @@
+﻿Model: 
+  EntityType: Blog
+    Properties: 
+      BlogId (int) Required PK AfterSave:Throw ValueGenerated.OnAdd
+      Url (string) Required
+    Navigations: 
+      Posts (List<Post>) Collection ToDependent Post Inverse: Blog
+    Keys: 
+      BlogId PK
+    Annotations: 
+      DiscriminatorProperty: 
+      Relational:FunctionName: 
+      Relational:Schema: 
+      Relational:SqlQuery: 
+      Relational:TableName: Blogs
+      Relational:ViewName: 
+      Relational:ViewSchema: 
+  EntityType: Post
+    Properties: 
+      PostId (int?) Required PK AfterSave:Throw ValueGenerated.OnAdd
+      BlogId (int) Required FK Index
+      Content (string) Required
+      NewColumn (int) Required
+      Title (string) Required
+    Navigations: 
+      Blog (Blog) ToPrincipal Blog Inverse: Posts
+    Keys: 
+      PostId PK
+    Foreign keys: 
+      Post {'BlogId'} -> Blog {'BlogId'} ToDependent: Posts ToPrincipal: Blog Cascade
+    Indexes: 
+      BlogId
+    Annotations: 
+      DiscriminatorProperty: 
+      Relational:FunctionName: 
+      Relational:Schema: 
+      Relational:SqlQuery: 
+      Relational:TableName: Posts
+      Relational:ViewName: 
+      Relational:ViewSchema: 
+Annotations: 
+  ProductVersion: 7.0.4
