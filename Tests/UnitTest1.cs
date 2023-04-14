@@ -1,4 +1,5 @@
 using dotnet_efcore_check_syned;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Snapshooter.Xunit;
 //using Snapshooter.Xunit;
 using System.Diagnostics;
@@ -409,6 +410,14 @@ namespace CustomNS
         {
             Console.WriteLine("Folder does not exist.");
         }
+    }
+
+    [Fact]
+    public void AcknowledgeDbContextChanges()
+    {
+        var dbContext = new BloggingContext();
+        var dbModel = dbContext.Model.ToDebugString(MetadataDebugStringOptions.LongDefault);
+        Snapshot.Match(dbModel);
     }
 
     [Fact]
